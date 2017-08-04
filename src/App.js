@@ -49,15 +49,19 @@ class UidInput extends Component {
   getSuggestions = (txt) => {
     query('/suggest/langvar', {'txt': txt, 'pref_trans_langvar': 187})
     .then((response) => {
-      var suggestions = response.suggest.map((s) => {
-        var nameString = s.trans.map(trans => trans.txt).join(' / ');
-        return {
-          text: s.uid, 
-          // value: <UidItem item={s}/>,
-          value: <MenuItem primaryText={nameString} secondaryText={s.uid}/>,
-          item: s,
-        }});
-      this.setState({ suggestions });
+      if (response.suggest) {
+        var suggestions = response.suggest.map((s) => {
+          var nameString = s.trans.map(trans => trans.txt).join(' / ');
+          return {
+            text: s.uid, 
+            // value: <UidItem item={s}/>,
+            value: <MenuItem primaryText={nameString} secondaryText={s.uid}/>,
+            item: s,
+          }});
+        this.setState({ suggestions });
+      } else {
+        this.setState({ suggestions: []});
+      }
     });
   }
   
