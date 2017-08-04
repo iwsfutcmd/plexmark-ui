@@ -1,0 +1,21 @@
+{
+  "name": "plexmark",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "material-ui": "^0.18.7",
+    "material-ui-slider-label": "https://github.com/tariqwest/material-ui-slider-label.git",
+    "react": "^15.6.1",
+    "react-autocomplete": "^1.5.10",
+    "react-dom": "^15.6.1",
+    "react-scripts": "1.0.10",
+    "react-tap-event-plugin": "^2.0.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
+  "devDependencies": {}
+}
