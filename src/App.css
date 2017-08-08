@@ -5,23 +5,21 @@
   max-width: 480px;
 }
 
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 80px;
+.uid-item {
+  /*margin-bottom: 1em;*/
 }
 
-.App-header {
-  background-color: #222;
-  height: 150px;
-  padding: 20px;
-  color: white;
+.uid-line {
+  line-height: normal;
 }
 
-.App-intro {
-  font-size: large;
+.uid-main {
+  display: flex;
+  justify-content: space-between;
 }
 
-@keyframes App-logo-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+.uid-alt {
+  margin-inline-start: 1em;
+  font-size: small;
+  color: darkgray;
 }

@@ -6,36 +6,21 @@ import Slider from 'material-ui-slider-label/Slider';
 import RaisedButton from 'material-ui/RaisedButton';
 import AutoComplete from 'material-ui/AutoComplete';
 import MenuItem from 'material-ui/MenuItem';
-import Subheader from 'material-ui/Subheader';
+// import Subheader from 'material-ui/Subheader';
+import CircularProgress from 'material-ui/CircularProgress';
 import injectTapEventPlugin from 'react-tap-event-plugin';
+import { query, getTranslations } from './api';
+import locale2 from 'locale2';
 
 injectTapEventPlugin();
 
 const panlexRed = '#A60A0A'
-
-const VERSION = 2
-const APISERVER = 'https://api.panlex.org'
-// const MAXRESULT = 2000
-// const MAXOFFSET = 250000
-const URLBASE = (VERSION === 2) ? APISERVER + '/v2' : APISERVER
 
 const muiTheme = getMuiTheme({
   palette: {
     primary1Color: panlexRed,
   }
 })
-
-export function query(ep, params) {
-  let url = URLBASE + ep
-  return(fetch(url, {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-    },
-    body: JSON.stringify(params),
-  })
-  .then((response) => response.json()));
-}
 
 class UidInput extends Component {
   constructor(props) {
@@ -51,11 +36,22 @@ class UidInput extends Component {
     .then((response) => {
       if (response.suggest) {
         var suggestions = response.suggest.map((s) => {
-          var nameString = s.trans.map(trans => trans.txt).join(' / ');
+          var altNameString = s.trans.slice(1).map(tran => tran.txt).join(' — ');
           return {
             text: s.uid, 
-            // value: <UidItem item={s}/>,
-            value: <MenuItem primaryText={nameString} secondaryText={s.uid}/>,
+            value: (
+              <MenuItem>
+                <div className='uid-item' style={{direction: this.props.direction}}>
+                  <div className='uid-line uid-main'>
+                    <span>{s.trans[0].txt}</span>
+                    <span>{s.uid}</span>
+                  </div>
+                  <div className='uid-line uid-alt'>
+                    {altNameString}
+                  </div>
+                </div>
+              </MenuItem>
+            ),
             item: s,
           }});
         this.setState({ suggestions });
@@ -68,7 +64,7 @@ class UidInput extends Component {
   render() {
     return (
       <AutoComplete
-        floatingLabelText="Language"
+        floatingLabelText={this.props.label}
         searchText={this.state.searchText}
         filter={AutoComplete.noFilter}
         dataSource={this.state.suggestions}
@@ -78,21 +74,31 @@ class UidInput extends Component {
           this.props.onNewRequest(suggestion);
         }}
         fullWidth={true}
+        menuProps={{maxHeight: '24ex'}}
       />
     )
   }
 }
 
-
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      loading: false,
       uid: '',
       chaos: 6,
       fakeExprs: [],
       result: '',
+      direction: 'ltr',
+      interfaceLang: 'eng-000',
+      label: 'lng'
     }
+    this.setLabel()
+  }
+  
+  setLabel = () => {
+    getTranslations('lng', 'art-000', this.state.interfaceLang)
+    .then((result) => this.setState({label: result[0].txt}))
   }
   
   handleSlider = (event, value) => {
@@ -104,27 +110,37 @@ class App extends Component {
   }
   
   generate = (event) => {
+    this.setState({loading: true})
     query('/fake_expr', {'uid': this.state.uid, 'state_size': 11 - this.state.chaos, 'count': 25})
     .then(
       (response) => {
         if (response.result)
-          this.setState({ fakeExprs: response.result});
+          this.setState({ 
+            fakeExprs: response.result,
+            loading: false
+          });
         else
-          this.setState({ fakeExprs: []});
+          this.setState({ 
+            fakeExprs: [],
+            loading: false
+          });
       }
     )
   }
   
   render() {
     return (
-      <div className="App">
+      <div className="App" style={{direction: this.state.direction}}>
         <MuiThemeProvider muiTheme={muiTheme}>
           <div>
-            <UidInput 
+            <UidInput
               onNewRequest={(item) => this.setState({ uid: item.text })}
+              direction={this.state.direction}
+              label={this.state.label}
             />
-            <Subheader>Chaos</Subheader>
+            <span>Chaos</span>
             <Slider
+              axis={(this.state.direction === 'ltr') ? 'x' : 'x-reverse'}
               step={1}
               min={1}
               max={10}
@@ -141,11 +157,15 @@ class App extends Component {
               label="Generate!"
               onTouchTap={this.generate}
             />
+            {(this.state.loading) ? 
+              <div><CircularProgress/></div> :
+              this.state.fakeExprs.map( (fakeExpr, index) => (
+                <div key={index}>{fakeExpr}</div>
+              ))
+            }
           </div>
         </MuiThemeProvider>
-        {this.state.fakeExprs.map( (fakeExpr, index) => (
-          <div key={index}>{fakeExpr}</div>
-        ))}
+        {/* {locale2} */}
       </div>
     );
   }
