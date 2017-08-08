@@ -32,7 +32,7 @@ class UidInput extends Component {
   }
   
   getSuggestions = (txt) => {
-    query('/suggest/langvar', {'txt': txt, 'pref_trans_langvar': 187})
+    query('/suggest/langvar', {'txt': txt, 'pref_trans_langvar': this.props.interfaceLangvar})
     .then((response) => {
       if (response.suggest) {
         var suggestions = response.suggest.map((s) => {
@@ -91,6 +91,7 @@ class App extends Component {
       result: '',
       direction: 'ltr',
       interfaceLang: 'eng-000',
+      interfaceLangvar: 187,
       label: 'lng'
     }
     this.setLabel()
@@ -137,6 +138,7 @@ class App extends Component {
               onNewRequest={(item) => this.setState({ uid: item.text })}
               direction={this.state.direction}
               label={this.state.label}
+              interfaceLangvar={this.state.interfaceLangvar}
             />
             <span>Chaos</span>
             <Slider
