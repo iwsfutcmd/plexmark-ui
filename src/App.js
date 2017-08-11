@@ -1,21 +1,19 @@
 import React, { Component } from 'react';
 import './App.css';
+import { query, getTranslations } from './api';
+import locale2 from 'locale2';
+
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import Slider from 'material-ui-slider-label/Slider';
 import RaisedButton from 'material-ui/RaisedButton';
 import AutoComplete from 'material-ui/AutoComplete';
 import MenuItem from 'material-ui/MenuItem';
-// import Subheader from 'material-ui/Subheader';
+import { List, ListItem } from 'material-ui/List';
 import CircularProgress from 'material-ui/CircularProgress';
 import injectTapEventPlugin from 'react-tap-event-plugin';
-import { query, getTranslations } from './api';
-import locale2 from 'locale2';
-
+const panlexRed = '#A60A0A';
 injectTapEventPlugin();
-
-const panlexRed = '#A60A0A'
-
 const muiTheme = getMuiTheme({
   palette: {
     primary1Color: panlexRed,
@@ -52,7 +50,7 @@ class UidInput extends Component {
                 </div>
               </MenuItem>
             ),
-            item: s,
+            langName: s.trans[0].txt,
           }});
         this.setState({ suggestions });
       } else {
@@ -70,11 +68,11 @@ class UidInput extends Component {
         dataSource={this.state.suggestions}
         onUpdateInput={this.getSuggestions}
         onNewRequest={(suggestion) => {
-          this.setState({searchText: suggestion.item.trans[0].txt});
+          this.setState({searchText: suggestion.langName});
           this.props.onNewRequest(suggestion);
         }}
         fullWidth={true}
-        menuProps={{maxHeight: '24ex'}}
+        menuProps={{maxHeight: 240}}
       />
     )
   }
@@ -92,7 +90,8 @@ class App extends Component {
       direction: 'ltr',
       interfaceLang: 'eng-000',
       interfaceLangvar: 187,
-      label: 'lng'
+      label: 'lng',
+      sliding: false,
     }
     this.setLabel()
   }
@@ -140,30 +139,41 @@ class App extends Component {
               label={this.state.label}
               interfaceLangvar={this.state.interfaceLangvar}
             />
-            <span>Chaos</span>
-            <Slider
-              axis={(this.state.direction === 'ltr') ? 'x' : 'x-reverse'}
-              step={1}
-              min={1}
-              max={10}
-              value={this.state.chaos}
-              onChange={this.handleSlider}
-              label={
-                <div style={{position: 'relative', top: '16px'}}>
-                  {this.state.chaos}
-                </div>
-              }
-            />
+            <div className="slider">
+              <p style={{align: 'left'}}>Chaos</p>
+              <Slider
+                axis={(this.state.direction === 'ltr') ? 'x' : 'x-reverse'}
+                step={1}
+                min={1}
+                max={10}
+                value={this.state.chaos}
+                onChange={this.handleSlider}
+                onDragStart={() => this.setState({sliding: true})}
+                onDragStop={() => this.setState({sliding: false})}
+                label={
+                  <div className="slider-teardrop" style={{visibility: this.state.sliding ? 'visible' : 'hidden'}}>
+                    <div className="slider-label">
+                      {this.state.chaos}
+                    </div>
+                  </div>
+                }
+              />
+            </div>
             <RaisedButton
-              style={{marginBottom: 16}}
               label="Generate!"
               onTouchTap={this.generate}
             />
             {(this.state.loading) ? 
               <div><CircularProgress/></div> :
-              this.state.fakeExprs.map( (fakeExpr, index) => (
-                <div key={index}>{fakeExpr}</div>
-              ))
+              <List>
+                {this.state.fakeExprs.map( (fakeExpr, index) =>
+                  <ListItem 
+                    primaryText={fakeExpr} 
+                    key={index}
+                    innerDivStyle={{padding: 8}}
+                  />
+                )}
+              </List>
             }
           </div>
         </MuiThemeProvider>

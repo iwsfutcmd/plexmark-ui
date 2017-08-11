@@ -5,6 +5,30 @@
   max-width: 480px;
 }
 
+/*.slider {
+  display: flex;
+}*/
+
+.slider-teardrop {
+  width: 30px;
+  height: 30px;
+  border-radius: 50% 50% 50% 0;
+  background: #A60A0A;
+  position: relative;
+  transform: rotate(-45deg);
+  top: -40px;
+  left: -6px;
+}
+
+.slider-label {
+  transform: rotate(45deg);
+  position: relative;
+  color: white;
+  text-align: center;
+  top: 3px;
+  /*bottom: 32px;*/
+}
+
 .uid-item {
   /*margin-bottom: 1em;*/
 }
