@@ -129,6 +129,7 @@ class App extends Component {
   }
   
   render() {
+    var flip = (this.state.direction === 'rtl') ? 'scaleX(-1)' : 'scaleX(1)';
     return (
       <div className="App" style={{direction: this.state.direction}}>
         <MuiThemeProvider muiTheme={muiTheme}>
@@ -139,10 +140,11 @@ class App extends Component {
               label={this.state.label}
               interfaceLangvar={this.state.interfaceLangvar}
             />
-            <div className="slider">
-              <p style={{align: 'left'}}>Chaos</p>
+            <div className="slider-box">
+              <span className="slider-icon chaos-low" style={{transform: flip}}>🗨</span>
               <Slider
-                axis={(this.state.direction === 'ltr') ? 'x' : 'x-reverse'}
+                className="slider"
+                axis={(this.state.direction === 'rtl') ? 'x-reverse' : 'x'}
                 step={1}
                 min={1}
                 max={10}
@@ -151,13 +153,35 @@ class App extends Component {
                 onDragStart={() => this.setState({sliding: true})}
                 onDragStop={() => this.setState({sliding: false})}
                 label={
-                  <div className="slider-teardrop" style={{visibility: this.state.sliding ? 'visible' : 'hidden'}}>
-                    <div className="slider-label">
+                  <div 
+                    className="slider-label-box"
+                    style={{
+                      visibility: this.state.sliding ? 'visible' : 'hidden',
+                      transform: (this.state.direction === 'rtl') ? 'translate(-50%)' : 'translate(50%)',
+                    }}
+                  >
+                    <svg 
+                      className="slider-svg" 
+                      width={50} 
+                      height={50}
+                      style={{
+                        transform: (this.state.direction === 'rtl') ? 'translate(50%, -110%)' : 'translate(-50%,  -110%)',
+                      }}
+                    >
+                      <path d="m25 50 l -10 -10 a 15 15, 0, 1, 1, 20 0 Z" fill={panlexRed}/>
+                    </svg>
+                    <div
+                      className="slider-label-text"
+                      style={{
+                        transform: (this.state.direction === 'rtl') ? 'translate(50%, -425%)' : 'translate(-50%,  -425%)',
+                      }}
+                    >
                       {this.state.chaos}
                     </div>
                   </div>
                 }
               />
+              <span className="slider-icon chaos-high" style={{transform: flip}}>🗯</span>
             </div>
             <RaisedButton
               label="Generate!"

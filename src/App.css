@@ -1,3 +1,8 @@
+/*@font-face {
+  font-family: 'Noto Emoji';
+  src: url(./fonts/NotoEmoji-Regular.ttf) format('ttf');
+}*/
+
 .App {
   margin: 0px auto;
   padding: 0px 16px;
@@ -5,28 +10,44 @@
   max-width: 480px;
 }
 
-/*.slider {
+.slider-box {
   display: flex;
-}*/
-
-.slider-teardrop {
-  width: 30px;
-  height: 30px;
-  border-radius: 50% 50% 50% 0;
-  background: #A60A0A;
-  position: relative;
-  transform: rotate(-45deg);
-  top: -40px;
-  left: -6px;
+  justify-content: space-between;
+  /*border: 1px solid #000;*/
+  align-items: center;
 }
 
-.slider-label {
-  transform: rotate(45deg);
+.slider-icon {
+  font-family: 'Noto Color Emoji';
+  font-size: x-large;
+  margin-top: 24px;
+  margin-bottom: 48px;
+}
+
+.slider {
+  width: 100%;
+  order: 2;
+}
+
+.chaos-low {
+  order: 1;
+  margin-inline-end: 8px;
+}
+
+.chaos-high {
+  order: 3;
+  margin-inline-start: 8px;
+}
+
+.slider-label-text {
+  /*border: 1px solid #000;*/
+  width: 50px;
   position: relative;
   color: white;
-  text-align: center;
-  top: 3px;
-  /*bottom: 32px;*/
+}
+
+.slider-label-box {
+  /*border: 1px solid #000;*/
 }
 
 .uid-item {
