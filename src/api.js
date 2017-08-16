@@ -19,7 +19,7 @@ export function getTranslations(txt, uidDe, uidAl) {
     trans_uid: uidDe,
     uid: uidAl,
     trans_txt: txt,
-    include: 'trans_quality',
+    include: ['trans_quality', 'trans_txt'],
     sort: 'trans_quality desc',
   }).then(responseData => responseData.result))
 }
