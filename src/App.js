@@ -14,7 +14,7 @@ import './App.css';
 import { query, getTranslations } from './api';
 import UidInput from './UidInput';
 
-const DEBUG = true;
+const DEBUG = false;
 
 const panlexRed = '#A60A0A';
 injectTapEventPlugin();
