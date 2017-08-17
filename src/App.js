@@ -1,90 +1,34 @@
 import React, { Component } from 'react';
-import './App.css';
-import { query, getTranslations} from './api';
+
 import locale2 from 'locale2';
 
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import Slider from 'material-ui-slider-label/Slider';
 import RaisedButton from 'material-ui/RaisedButton';
-import AutoComplete from 'material-ui/AutoComplete';
-import MenuItem from 'material-ui/MenuItem';
-// import { List, ListItem } from 'material-ui/List';
 import { Table, TableBody, TableRow, TableRowColumn } from 'material-ui/Table';
 import CircularProgress from 'material-ui/CircularProgress';
 import injectTapEventPlugin from 'react-tap-event-plugin';
+
+import './App.css';
+import { query, getTranslations } from './api';
+import UidInput from './UidInput';
+
 const panlexRed = '#A60A0A';
 injectTapEventPlugin();
-const muiTheme = getMuiTheme({
-  palette: {
-    primary1Color: panlexRed,
-  }
-})
-
-class UidInput extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      searchText: '',
-      suggestions: [],
-    }
-  }
-  
-  getSuggestions = (txt) => {
-    query('/suggest/langvar', {'txt': txt, 'pref_trans_langvar': this.props.interfaceLangvar})
-    .then((response) => {
-      if (response.suggest) {
-        var suggestions = response.suggest.map((s) => {
-          var altNameString = s.trans.slice(1).map(tran => tran.txt).join(' — ');
-          return {
-            text: s.uid, 
-            value: (
-              <MenuItem>
-                <div className='uid-item' style={{direction: this.props.direction}}>
-                  <div className='uid-line uid-main'>
-                    <span>{s.trans[0].txt}</span>
-                    <span>{s.uid}</span>
-                  </div>
-                  <div className='uid-line uid-alt'>
-                    {altNameString}
-                  </div>
-                </div>
-              </MenuItem>
-            ),
-            langName: s.trans[0].txt,
-          }});
-        this.setState({ suggestions });
-      } else {
-        this.setState({ suggestions: []});
-      }
-    });
-  }
-  
-  render() {
-    return (
-      <AutoComplete
-        floatingLabelText={this.props.label}
-        floatingLabelStyle={{transformOrigin: (this.props.direction === 'rtl') ? "right top 0px" : "left top 0px"}}
-        searchText={this.state.searchText}
-        filter={AutoComplete.noFilter}
-        dataSource={this.state.suggestions}
-        onUpdateInput={this.getSuggestions}
-        onNewRequest={(suggestion) => {
-          this.setState({searchText: suggestion.langName});
-          this.props.onNewRequest(suggestion);
-        }}
-        fullWidth={true}
-        menuProps={{maxHeight: 240}}
-      />
-    )
-  }
-}
 
 class App extends Component {
   constructor(props) {
     super(props);
-    var labelsToTranslate = ['lng', 'kmc', 'plu']
+    const muiTheme = getMuiTheme({
+      palette: {
+        primary1Color: panlexRed,
+      }
+    })
+
+    let labelsToTranslate = ['lng', 'kmc', 'plu']
     this.state = {
+      muiTheme,
       loading: false,
       uid: '',
       chaos: 6,
@@ -99,15 +43,11 @@ class App extends Component {
   
   setLabels = () => {
     getTranslations(Object.keys(this.state.labels), 'art-000', this.state.interfaceLang)
-    // .then((result) => {
-    //   this.setState({labels: {'lng': result[0].txt}, interfaceLangvar: result[0].langvar})
-    // });
     .then((result) => {
       let output = {};
       for (let txt of Object.keys(this.state.labels)) {
         output[txt] = result.filter(trn => (trn.trans_txt === txt))[0].txt
       };
-      console.log(output);
       this.setState({labels: output, interfaceLangvar: result[0].langvar});
     });
   }
@@ -119,13 +59,13 @@ class App extends Component {
   }
   
   handleSelection = (index) => {
-    var newFakeExprs = this.state.fakeExprs.slice();
+    let newFakeExprs = this.state.fakeExprs.slice();
     newFakeExprs[index].saved = !newFakeExprs[index].saved;
     this.setState({fakeExprs: newFakeExprs})
   }
   
   generate = (event) => {
-    var savedFakeExprs = this.state.fakeExprs.filter((fakeExpr) => fakeExpr.saved)
+    let savedFakeExprs = this.state.fakeExprs.filter((fakeExpr) => fakeExpr.saved)
     this.setState({loading: true})
     query('/fake_expr', {'uid': this.state.uid, 'state_size': 11 - this.state.chaos, 'count': 25})
     .then(
@@ -145,15 +85,32 @@ class App extends Component {
   }
   
   render() {
-    var flip = (this.state.direction === 'rtl') ? 'scaleX(-1)' : 'scaleX(1)';
+    let dirStyles = {};
+    if (this.state.direction === 'rtl') {
+      this.state.muiTheme.isRtl = true;
+      dirStyles['slider-icon'] = {transform: 'scaleX(-1)'};
+      dirStyles['slider-label-box'] = {transform: 'translate(-50%)'};
+      dirStyles['slider-svg'] = {transform: 'translate(50%, -110%)'};
+      dirStyles['slider-label-text'] = {transform: 'translate(50%, -500%)'};
+    } else {
+      this.state.muiTheme.isRtl = false;
+      dirStyles['slider-icon'] = {transform: 'scaleX(1)'};
+      dirStyles['slider-label-box'] = {transform: 'translate(50%)'};
+      dirStyles['slider-svg'] = {transform: 'translate(-50%, -110%)'};
+      dirStyles['slider-label-text'] = {transform: 'translate(-50%, -500%)'};
+    }
+    let slidingStyleTransform = ' ' + (this.state.sliding ? 'scale(1)' : 'scale(0)');
+    dirStyles['slider-svg'].transform += slidingStyleTransform;
+    dirStyles['slider-label-text'].transform += slidingStyleTransform;
+        
     return (
       <div className="App" style={{direction: this.state.direction}}>
-        <MuiThemeProvider muiTheme={muiTheme}>
+        <MuiThemeProvider muiTheme={this.state.muiTheme}>
           <div>
-            {/* <RaisedButton 
+            <RaisedButton 
               label="🔁" 
               onClick={() => this.setState({direction: (this.state.direction === 'rtl') ? 'ltr' : 'rtl'})}
-            /> */}
+            />
             <UidInput
               onNewRequest={(item) => this.setState({ uid: item.text })}
               direction={this.state.direction}
@@ -161,10 +118,9 @@ class App extends Component {
               interfaceLangvar={this.state.interfaceLangvar}
             />
             <div className="slider-box">
-              <span className="slider-icon chaos-low" style={{transform: flip}}>🗨</span>
+              <span className="slider-icon chaos-low" style={dirStyles['slider-icon']}>🗨</span>
               <Slider
                 className="slider"
-                axis={(this.state.direction === 'rtl') ? 'x-reverse' : 'x'}
                 step={1}
                 min={1}
                 max={10}
@@ -175,34 +131,26 @@ class App extends Component {
                 label={
                   <div 
                     className="slider-label-box"
-                    style={{
-                      visibility: this.state.sliding ? 'visible' : 'hidden',
-                      opacity: this.state.sliding ? 1 : 0,
-                      transform: (this.state.direction === 'rtl') ? 'translate(-50%)' : 'translate(50%)',
-                    }}
+                    style={dirStyles['slider-label-box']}
                   >
                     <svg 
                       className="slider-svg" 
                       width={50} 
                       height={50}
-                      style={{
-                        transform: (this.state.direction === 'rtl') ? 'translate(50%, -110%)' : 'translate(-50%,  -110%)',
-                      }}
+                      style={dirStyles['slider-svg']}
                     >
-                      <path d="m25 50 l -10 -10 a 15 15, 0, 1, 1, 20 0 Z" fill={muiTheme.palette.primary1Color}/>
+                      <path d="m25 50 l -10 -10 a 15 15, 0, 1, 1, 20 0 Z" fill={this.state.muiTheme.palette.primary1Color}/>
                     </svg>
                     <div
                       className="slider-label-text"
-                      style={{
-                        transform: (this.state.direction === 'rtl') ? 'translate(50%, -500%)' : 'translate(-50%,  -500%)',
-                      }}
+                      style={dirStyles['slider-label-text']}
                     >
                       {this.state.chaos}
                     </div>
                   </div>
                 }
               />
-              <span className="slider-icon chaos-high" style={{transform: flip}}>🗯</span>
+              <span className="slider-icon chaos-high" style={dirStyles['slider-icon']}>🗯</span>
             </div>
             <RaisedButton
               label={(this.state.fakeExprs.length > 0) ? this.getLabel('plu') : this.getLabel('kmc')}
@@ -234,19 +182,6 @@ class App extends Component {
                 </Table>
               }
             </div>
-              {/* {(this.state.loading) ? 
-                <div className="loading-icon"><CircularProgress/></div> :
-                <List>
-                {this.state.fakeExprs.map( (fakeExpr, index) =>
-              <ListItem
-              primaryText={fakeExpr.txt}
-              key={index}
-              innerDivStyle={{padding: 8}}
-              onClick={() => this.moveToTop(fakeExpr, index)}
-              />
-                )}
-              </List>
-            } */}
           </div>
         </MuiThemeProvider>
         {/* {locale2} */}

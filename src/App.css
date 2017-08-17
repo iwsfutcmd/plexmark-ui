@@ -41,6 +41,8 @@
 
 .slider-label-text {
   /*border: 1px solid #000;*/
+  transition: all 450ms cubic-bezier(0.0, 0.0, 0.2, 1), 0ms; 
+  transform-origin: center bottom;
   font-size: small;
   width: 50px;
   position: absolute;
@@ -48,27 +50,13 @@
 }
 
 .slider-label-box {
-  transition: all 450ms cubic-bezier(0.0, 0.0, 0.2, 1), 0ms; 
+  /*transition: all 450ms cubic-bezier(0.0, 0.0, 0.2, 1), 0ms; */
   /*border: 1px solid #000;*/
 }
 
-.uid-item {
-  /*margin-bottom: 1em;*/
-}
-
-.uid-line {
-  line-height: normal;
-}
-
-.uid-main {
-  display: flex;
-  justify-content: space-between;
-}
-
-.uid-alt {
-  margin-inline-start: 1em;
-  font-size: small;
-  color: darkgray;
+.slider-svg {
+  transition: all 450ms cubic-bezier(0.0, 0.0, 0.2, 1), 0ms; 
+  transform-origin: center bottom;
 }
 
 .result {
