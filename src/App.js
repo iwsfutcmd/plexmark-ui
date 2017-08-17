@@ -36,7 +36,7 @@ class App extends Component {
       chaos: 6,
       fakeExprs: [],
       direction: 'ltr',
-      interfaceLang: 'eng-000',
+      interfaceLangvar: 'eng-000',
       labels: labelsToTranslate.reduce((obj, v) => {obj[v] = v; return obj;}, {}),
       sliding: false,
     }
