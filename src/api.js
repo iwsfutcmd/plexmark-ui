@@ -14,12 +14,17 @@ export function query(ep, params) {
   .then((response) => response.json()));
 }
 
-export function getTranslations(txt, uidDe, uidAl) {
-  return(query('/expr', {
+export function getTranslations(txt, uidDe, uidAl, distance = 0) {
+  let queryOne = {
     trans_uid: uidDe,
     uid: uidAl,
     trans_txt: txt,
     include: ['trans_quality', 'trans_txt'],
     sort: 'trans_quality desc',
-  }).then(responseData => responseData.result))
+  };
+  let queryTwo = Object.assign({trans_distance: 2}, queryOne);
+  return(query('/fallback', {requests: [
+    {url: '/expr', query: queryOne},
+    {url: '/expr', query: queryTwo},
+  ]}).then(responseData => responseData.result))
 }

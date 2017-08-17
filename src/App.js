@@ -14,7 +14,7 @@ import './App.css';
 import { query, getTranslations } from './api';
 import UidInput from './UidInput';
 
-const DEBUG = false;
+const DEBUG = true;
 
 const panlexRed = '#A60A0A';
 injectTapEventPlugin();
@@ -36,7 +36,7 @@ class App extends Component {
       chaos: 6,
       fakeExprs: [],
       direction: 'ltr',
-      interfaceLangvar: 'eng-000',
+      interfaceLang: 'eng-000',
       labels: labelsToTranslate.reduce((obj, v) => {obj[v] = v; return obj;}, {}),
       sliding: false,
     }
@@ -109,11 +109,11 @@ class App extends Component {
       <div className="App" style={{direction: this.state.direction}}>
         <MuiThemeProvider muiTheme={this.state.muiTheme}>
           <div>
-            {DEBUG &&    	
-            <RaisedButton 
-              label="🔁" 
-              onClick={() => this.setState({direction: (this.state.direction === 'rtl') ? 'ltr' : 'rtl'})}
-            />
+            {DEBUG &&
+              <RaisedButton
+                label="🔁"
+                onClick={() => this.setState({direction: (this.state.direction === 'rtl') ? 'ltr' : 'rtl'})}
+              />
             }
             <UidInput
               onNewRequest={(item) => this.setState({ uid: item.text })}
