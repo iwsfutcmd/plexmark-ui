@@ -116,7 +116,7 @@ class App extends Component {
               />
             }
             <UidInput
-              onNewRequest={(item) => this.setState({ uid: item.text })}
+              onNewRequest={(item) => this.setState({ uid: item.uid })}
               direction={this.state.direction}
               label={this.getLabel('lng')}
               interfaceLangvar={this.state.interfaceLangvar}
