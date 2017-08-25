@@ -8,11 +8,13 @@ import Slider from 'material-ui-slider-label/Slider';
 import RaisedButton from 'material-ui/RaisedButton';
 import { Table, TableBody, TableRow, TableRowColumn } from 'material-ui/Table';
 import CircularProgress from 'material-ui/CircularProgress';
+
 import injectTapEventPlugin from 'react-tap-event-plugin';
 
 import './App.css';
 import { query, getTranslations } from './api';
-import UidInput from './UidInput';
+import PanLexAppBar from './PanLexAppBar';
+import UidInputChipped from './UidInputChipped';
 
 const DEBUG = false;
 
@@ -28,7 +30,7 @@ class App extends Component {
       }
     })
 
-    let labelsToTranslate = ['lng', 'kmc', 'plu']
+    let labelsToTranslate = ['lng', 'kmc', 'plu', 'mod', 'PanLex', 'epr', 'zxx']
     this.state = {
       muiTheme,
       loading: false,
@@ -39,6 +41,7 @@ class App extends Component {
       interfaceLang: 'eng-000',
       labels: labelsToTranslate.reduce((obj, v) => {obj[v] = v; return obj;}, {}),
       sliding: false,
+      langs: []
     }
     this.setLabels()
   }
@@ -109,17 +112,26 @@ class App extends Component {
       <div className="App" style={{direction: this.state.direction}}>
         <MuiThemeProvider muiTheme={this.state.muiTheme}>
           <div>
-            {DEBUG &&
-              <RaisedButton
-                label="🔁"
-                onClick={() => this.setState({direction: (this.state.direction === 'rtl') ? 'ltr' : 'rtl'})}
-              />
-            }
-            <UidInput
-              onNewRequest={(item) => this.setState({ uid: item.uid })}
+            <PanLexAppBar 
+              direction={this.state.direction}
+              title={[this.getLabel('PanLex'), this.getLabel('epr'), this.getLabel('zxx')].join(' — ')}
+              lngModLabel={[this.getLabel('lng'), this.getLabel('mod')].join(' — ')}
+              switchDirection={() => this.setState({direction: (this.state.direction === 'rtl') ? 'ltr' : 'rtl'})}
+              setInterfaceLang={(lang) => {
+                this.setState({ 
+                  interfaceLang: lang.uid,
+                });
+                this.setLabels(lang.uid);
+              }}
+              interfaceLangvar={this.state.interfaceLangvar}
+            />
+            <UidInputChipped
+              langList={this.state.langs}
+              onSelectLang={(langList) => this.setState({langs: langList, uid: langList[0].uid })}
               direction={this.state.direction}
               label={this.getLabel('lng')}
               interfaceLangvar={this.state.interfaceLangvar}
+              compact={true}
             />
             <div className="slider-box">
               <span className="slider-icon chaos-low" style={dirStyles['slider-icon']}>🗨</span>
