@@ -18,7 +18,6 @@ import UidInputChipped from './UidInputChipped';
 
 const DEBUG = false;
 
-const panlexRed = '#A60A0A';
 injectTapEventPlugin();
 
 class App extends Component {
@@ -26,7 +25,14 @@ class App extends Component {
     super(props);
     const muiTheme = getMuiTheme({
       palette: {
-        primary1Color: panlexRed,
+        palette: {
+          primary1Color: "#A60A0A",
+          primary2Color: "#DF4A34",
+          primary3Color: "#700000",
+          accent1Color: "#424242",
+          accent2Color: "#6d6d6d",
+          accent3Color: "#1b1b1b",
+        }
       }
     })
 
