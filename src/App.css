@@ -4,10 +4,14 @@
 }*/
 
 .App {
-  margin: 0px auto;
+  /*margin: 0px auto;*/
+  /*padding: 0px 16px;*/
+  /*text-align: center;*/
+  /*max-width: 480px;*/
+}
+
+.app-body {
   padding: 0px 16px;
-  text-align: center;
-  max-width: 480px;
 }
 
 .slider-box {
@@ -15,10 +19,11 @@
   justify-content: space-between;
   /*border: 1px solid #000;*/
   align-items: center;
+  padding: 0px 8px;
 }
 
 .slider-icon {
-  font-family: 'Noto Color Emoji';
+  /*font-family: 'Noto Color Emoji';*/
   font-size: x-large;
   margin-top: 24px;
   margin-bottom: 48px;
@@ -26,16 +31,16 @@
 
 .slider {
   width: 100%;
-  order: 2;
+  /*order: 2;*/
 }
 
 .chaos-low {
-  order: 1;
+  /*order: 1;*/
   margin-inline-end: 8px;
 }
 
 .chaos-high {
-  order: 3;
+  /*order: 3;*/
   margin-inline-start: 8px;
 }
 
@@ -47,6 +52,7 @@
   width: 50px;
   position: absolute;
   color: white;
+  text-align: center;
 }
 
 .slider-label-box {
@@ -57,6 +63,10 @@
 .slider-svg {
   transition: all 450ms cubic-bezier(0.0, 0.0, 0.2, 1), 0ms; 
   transform-origin: center bottom;
+}
+
+.loading-icon {
+  margin-inline-start: 16px;
 }
 
 .result {

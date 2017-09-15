@@ -8,6 +8,7 @@
 .chips {
   display: flex;
   overflow: hidden;
+  width: 100%;
 }
 
 .lng-chip {

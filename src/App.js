@@ -25,18 +25,16 @@ class App extends Component {
     super(props);
     const muiTheme = getMuiTheme({
       palette: {
-        palette: {
-          primary1Color: "#A60A0A",
-          primary2Color: "#DF4A34",
-          primary3Color: "#700000",
-          accent1Color: "#424242",
-          accent2Color: "#6d6d6d",
-          accent3Color: "#1b1b1b",
-        }
+        primary1Color: "#A60A0A",
+        primary2Color: "#DF4A34",
+        primary3Color: "#700000",
+        accent1Color: "#424242",
+        accent2Color: "#6d6d6d",
+        accent3Color: "#1b1b1b",
       }
     })
 
-    let labelsToTranslate = ['lng', 'kmc', 'plu', 'mod', 'PanLex', 'epr', 'zxx']
+    let labelsToTranslate = ['lng', 'kmc', 'plu', 'mod', 'PanLex', 'epr', 'zxx', 'don']
     this.state = {
       muiTheme,
       loading: false,
@@ -122,6 +120,7 @@ class App extends Component {
               direction={this.state.direction}
               title={[this.getLabel('PanLex'), this.getLabel('epr'), this.getLabel('zxx')].join(' — ')}
               lngModLabel={[this.getLabel('lng'), this.getLabel('mod')].join(' — ')}
+              donLabel={this.getLabel('don')}
               switchDirection={() => this.setState({direction: (this.state.direction === 'rtl') ? 'ltr' : 'rtl'})}
               setInterfaceLang={(lang) => {
                 this.setState({ 
@@ -131,78 +130,82 @@ class App extends Component {
               }}
               interfaceLangvar={this.state.interfaceLangvar}
             />
-            <UidInputChipped
-              langList={this.state.langs}
-              onSelectLang={(langList) => this.setState({langs: langList, uid: langList[0].uid })}
-              direction={this.state.direction}
-              label={this.getLabel('lng')}
-              interfaceLangvar={this.state.interfaceLangvar}
-              compact={true}
-            />
-            <div className="slider-box">
-              <span className="slider-icon chaos-low" style={dirStyles['slider-icon']}>🗨</span>
-              <Slider
-                className="slider"
-                step={1}
-                min={1}
-                max={10}
-                value={this.state.chaos}
-                onChange={this.handleSlider}
-                onDragStart={() => this.setState({sliding: true})}
-                onDragStop={() => this.setState({sliding: false})}
-                label={
-                  <div 
-                    className="slider-label-box"
-                    style={dirStyles['slider-label-box']}
-                  >
-                    <svg 
-                      className="slider-svg" 
-                      width={50} 
-                      height={50}
-                      style={dirStyles['slider-svg']}
-                    >
-                      <path d="m25 50 l -10 -10 a 15 15, 0, 1, 1, 20 0 Z" fill={this.state.muiTheme.palette.primary1Color}/>
-                    </svg>
-                    <div
-                      className="slider-label-text"
-                      style={dirStyles['slider-label-text']}
-                    >
-                      {this.state.chaos}
-                    </div>
-                  </div>
-                }
+            <div className="app-body">
+              <UidInputChipped
+                langList={this.state.langs}
+                onSelectLang={(langList) => this.setState({langs: langList, uid: langList[0].uid })}
+                direction={this.state.direction}
+                label={this.getLabel('lng')}
+                interfaceLangvar={this.state.interfaceLangvar}
+                compact={true}
               />
-              <span className="slider-icon chaos-high" style={dirStyles['slider-icon']}>🗯</span>
-            </div>
-            <RaisedButton
-              label={(this.state.fakeExprs.length > 0) ? this.getLabel('plu') : this.getLabel('kmc')}
-              onClick={this.generate}
-            />
-            <div className="result">
-              {(this.state.loading) ?
-                <div><CircularProgress/></div> :
-                <Table 
-                  multiSelectable={true}
-                  onCellClick={(rowNumber) => this.handleSelection(rowNumber)}
-                >
-                  <TableBody displayRowCheckbox={true}>
-                    {this.state.fakeExprs.map( (fakeExpr, index) =>
-                      <TableRow
-                        className="fake-expr-row"
-                        key={index}
-                        selected={fakeExpr.saved}
-                        style={{height: '40px'}}
+              <div className="slider-box">
+                <span className="slider-icon chaos-low" style={dirStyles['slider-icon']}>🗨</span>
+                <Slider
+                  className="slider"
+                  step={1}
+                  min={1}
+                  max={10}
+                  value={this.state.chaos}
+                  onChange={this.handleSlider}
+                  onDragStart={() => this.setState({sliding: true})}
+                  onDragStop={() => this.setState({sliding: false})}
+                  label={
+                    <div 
+                      className="slider-label-box"
+                      style={dirStyles['slider-label-box']}
+                    >
+                      <svg 
+                        className="slider-svg" 
+                        width={50} 
+                        height={50}
+                        style={dirStyles['slider-svg']}
                       >
-                        <TableRowColumn 
-                          style={{fontSize: '16px', height: '40px'}}
+                        <path d="m25 50 l -10 -10 a 15 15, 0, 1, 1, 20 0 Z" fill={this.state.muiTheme.palette.primary1Color}/>
+                      </svg>
+                      <div
+                        className="slider-label-text"
+                        style={dirStyles['slider-label-text']}
+                      >
+                        {this.state.chaos}
+                      </div>
+                    </div>
+                  }
+                />
+                <span className="slider-icon chaos-high" style={dirStyles['slider-icon']}>🗯</span>
+              </div>
+              <RaisedButton
+                className="go-button"
+                label={(this.state.fakeExprs.length > 0) ? this.getLabel('plu') : this.getLabel('kmc')}
+                onClick={this.generate}
+                primary={true}
+              />
+              <div className="result">
+                {(this.state.loading) ?
+                  <div className="loading-icon"><CircularProgress/></div> :
+                  <Table 
+                    multiSelectable={true}
+                    onCellClick={(rowNumber) => this.handleSelection(rowNumber)}
+                  >
+                    <TableBody displayRowCheckbox={true}>
+                      {this.state.fakeExprs.map( (fakeExpr, index) =>
+                        <TableRow
+                          className="fake-expr-row"
+                          key={index}
+                          selected={fakeExpr.saved}
+                          style={{height: '40px'}}
                         >
-                          {fakeExpr.txt}
-                        </TableRowColumn>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              }
+                          <TableRowColumn 
+                            style={{fontSize: '16px', height: '40px'}}
+                          >
+                            {fakeExpr.txt}
+                          </TableRowColumn>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                }
+              </div>
             </div>
           </div>
         </MuiThemeProvider>
