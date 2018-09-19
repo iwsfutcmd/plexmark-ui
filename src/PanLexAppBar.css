@@ -1,0 +1,39 @@
+.don-button {
+    background-color: var(--mdc-theme-background, #ffffff) !important;
+    color: #000000 !important;
+}
+
+#more-menu {
+    margin-block-start: 8px;
+    margin-inline-end: 8px;
+}
+
+#interface-lang-dialog-surface {
+    min-width: unset;
+    inline-size: auto;
+}
+
+#interface-lang-dialog {
+    offset-block-start: -24vh;
+}
+
+#logo {
+    margin-inline-start: 12px;
+    padding-block-start: 8px;
+    padding-block-end: 8px;
+}
+
+#title {
+    margin-inline-start: 12px;
+    overflow: visible;
+}
+
+#don-container {
+    padding-block-start: 14px;
+    padding-block-end: 14px;
+}
+
+#menu-icon {
+    padding-block-start: 20px;
+    padding-block-end: 20px;
+}

@@ -1,0 +1,33 @@
+.lv-info-box {
+  display: flex;
+  align-items: center;
+  inline-size: 100%;
+  /* z-index: 2; */
+}
+
+.lv-info {
+  margin-inline-start: 8px;
+  inline-size: 100%;
+}
+
+.lv-info-line {
+  /*display: flex;*/
+  font-size: small;
+}
+
+.lv-info-label {
+  font-style: oblique;
+  margin-inline-end: 2px;
+}
+
+.lv-info-data {
+  /* margin-inline-start: 2px;
+  margin-inline-end: 2px; */
+  font-style: oblique;
+}
+
+@media (max-width: 840px) {
+  .lv-info-line {
+    flex-direction: column;
+  }
+}

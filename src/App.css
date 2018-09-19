@@ -1,83 +1,172 @@
-/*@font-face {
-  font-family: 'Noto Emoji';
-  src: url(./fonts/NotoEmoji-Regular.ttf) format('ttf');
-}*/
-
+* {
+    letter-spacing: unset !important;
+}
+  
 .App {
-  /*margin: 0px auto;*/
-  /*padding: 0px 16px;*/
-  /*text-align: center;*/
-  /*max-width: 480px;*/
+  --mdc-theme-primary: #C82521;
+  --mdc-theme-primary-light: #DF4A34;
+  --mdc-theme-primary-dark: #700000;
+  --mdc-theme-secondary: #aeaeae;
+  --mdc-theme-secondary-light: #e0e0e0;
+  --mdc-theme-secondary-dark: #7f7f7f;
+  --mdc-theme-background: #ffffff;
 }
 
-.app-body {
-  padding: 0px 16px;
-}
-
-.slider-box {
+.trn {
   display: flex;
+  /*padding: logical 0px 20px;*/
+  padding-inline-start: 20px;
+  padding-inline-end: 20px;
+  flex-direction: row;
+}
+
+.trn-box {
+  flex: auto;
+  /*padding: logical 0px 8px;*/
+  padding-inline-start: 8px;
+  padding-inline-end: 8px;
+  box-sizing: border-box;
+  inline-size: 50%;
+}
+
+.main-area {
+  display: flex;
+  flex-direction: column;
+  padding-inline-start: 28px;
+  padding-inline-end: 28px;
+}
+
+.uid-box {
+  display: flex;
+  align-items: baseline;
   justify-content: space-between;
-  /*border: 1px solid #000;*/
-  align-items: center;
-  padding: 0px 8px;
+  flex-direction: column;
 }
 
-.slider-icon {
-  /*font-family: 'Noto Color Emoji';*/
-  font-size: x-large;
-  margin-top: 24px;
-  margin-bottom: 48px;
+.txt-inputs {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  /*margin-inline-start: 4px;*/
+  inline-size: 100%
 }
 
-.slider {
-  width: 100%;
-  /*order: 2;*/
+.input-box {
+  margin-inline-start: 12px;
 }
 
-.chaos-low {
-  /*order: 1;*/
-  margin-inline-end: 8px;
-}
-
-.chaos-high {
-  /*order: 3;*/
-  margin-inline-start: 8px;
-}
-
-.slider-label-text {
-  /*border: 1px solid #000;*/
-  transition: all 450ms cubic-bezier(0.0, 0.0, 0.2, 1), 0ms; 
-  transform-origin: center bottom;
-  font-size: small;
-  width: 50px;
-  position: absolute;
-  color: white;
-  text-align: center;
-}
-
-.slider-label-box {
-  /*transition: all 450ms cubic-bezier(0.0, 0.0, 0.2, 1), 0ms; */
-  /*border: 1px solid #000;*/
-}
-
-.slider-svg {
-  transition: all 450ms cubic-bezier(0.0, 0.0, 0.2, 1), 0ms; 
-  transform-origin: center bottom;
-}
-
-.loading-icon {
-  margin-inline-start: 16px;
+@media (max-width: 840px) {
+  .trn {
+    flex-direction: column;
+    /*padding: logical 0px 12px;*/
+    padding-inline-start: 12px;
+    padding-inline-end: 12px;
+  }
+  
+  .trn-box {
+    inline-size: 100%;
+  }
 }
 
 .result {
-  margin-top: 16px;
+  margin-block-start: 16px;
 }
 
-.fake-expr-row td {
-  text-align: start !important;
-  height: 40px !important;
+.card-title {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px;
 }
 
-.fake-expr-row td div div {
+.card-title button {
   margin: unset !important;
+  position: unset !important;
+}
+
+.txt-input {
+  display: flex;
+  align-items: flex-start;
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
+  padding-block-start: 8px;
+  padding-block-end: 24px;
+}
+
+#trn-txt {
+  inline-size: 100%;
+}
+
+.tra-button {
+  min-inline-size: fit-content;
+}
+
+#expr-graph-dialog-surface {
+  max-width: unset;
+  min-width: unset;
+  max-inline-size: 75%;
+}
+
+.mdc-dialog__body {
+  text-align: center;
+}
+
+.close-button {
+  position: absolute;
+  offset-inline-end: 24px;
+  z-index: 2;
+  color: var(--mdc-theme-primary);
+  cursor: pointer;
+}
+
+@supports not (offset-inline-end: 0) {
+  .close-button {
+    right: 24px;
+  }
+}
+
+#txt-input-container {
+  inline-size: 100%;
+}
+
+#txt-input {
+  padding-inline-start: unset;
+  border-bottom: unset;
+  border-block-end: 1px solid rgba(0, 0, 0, .42);
+}
+
+#nno-label {
+  font-style: oblique;
+}
+
+#swap-icon {
+  color: black;
+}
+
+#first-trn-txt {
+  font-size: 1.5rem;
+}
+
+.chaos-bg {
+  background-color: var(--mdc-theme-secondary) !important;
+}
+
+.chaos {
+  background-color: var(--mdc-theme-primary) !important;
+}
+
+.chaos-thumb {
+  fill: var(--mdc-theme-primary) !important;
+  stroke: var(--mdc-theme-primary) !important;
+}
+
+.chaos-pin {
+  /* transform: translateZ(-1em); */
+}
+
+.kmc-button {
+  max-inline-size: fit-content;
+}
+
+.loading-icon {
+  padding: 16px;
 }

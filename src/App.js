@@ -1,82 +1,203 @@
 import React, { Component } from 'react';
 
-import locale2 from 'locale2';
+import '@material/button/dist/mdc.button.min.css';
+import '@material/card/dist/mdc.card.min.css';
+import '@material/typography/dist/mdc.typography.min.css';
+import '@material/toolbar/dist/mdc.toolbar.min.css';
+import '@material/ripple/dist/mdc.ripple.min.css';
+import '@material/slider/dist/mdc.slider.min.css';
+import {MDCSlider} from '@material/slider/dist/mdc.slider.min';
+import '@material/list/dist/mdc.list.min.css';
+import "@material/form-field/dist/mdc.form-field.min.css";
+import "@material/checkbox/dist/mdc.checkbox.min.css";
 
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import Slider from 'material-ui-slider-label/Slider';
-import RaisedButton from 'material-ui/RaisedButton';
-import { Table, TableBody, TableRow, TableRowColumn } from 'material-ui/Table';
-import CircularProgress from 'material-ui/CircularProgress';
+import '@material/textfield/dist/mdc.textfield.min.css';
+import {MDCTextField} from '@material/textfield/dist/mdc.textfield.min';
 
-import injectTapEventPlugin from 'react-tap-event-plugin';
+
+import shuffle from 'lodash/shuffle';
+// import countBy from 'lodash/countBy';
+// import orderBy from 'lodash/orderBy';
 
 import './App.css';
-import { query, getTranslations } from './api';
+import { query, getMultTranslations, getAllTranslations } from './api';
+import LvInfo from './LvInfo';
+import LvChips from './LvChips';
+import LvInput from './LvInput';
 import PanLexAppBar from './PanLexAppBar';
-import UidInputChipped from './UidInputChipped';
+import './material.css';
+import LoadingIcon from './LoadingIcon';
+
+
+const compactWidth = 840
 
 const DEBUG = false;
 
-injectTapEventPlugin();
-
+const initialUids = [
+  
+];
+const initialInterfaceUid = "eng-000";
 class App extends Component {
   constructor(props) {
     super(props);
-    const muiTheme = getMuiTheme({
-      palette: {
-        primary1Color: "#A60A0A",
-        primary2Color: "#DF4A34",
-        primary3Color: "#700000",
-        accent1Color: "#424242",
-        accent2Color: "#6d6d6d",
-        accent3Color: "#1b1b1b",
-      }
-    })
-
-    let labelsToTranslate = ['lng', 'kmc', 'plu', 'mod', 'PanLex', 'epr', 'zxx', 'don']
+    let labelsToTranslate = [
+      'PanLex', 'lng', 'tra', 'al', 'de', 'txt', 'mod', 'npo', 'don', 'plu',
+      'trn', 'viz', 'nom', 'kar', 'loc', 'del', 'nno', 'epr', 'zxx', 'kmc'
+    ]
+    
     this.state = {
-      muiTheme,
+      compact: window.innerWidth <= compactWidth,
+      lvCache: new Map(),
       loading: false,
-      uid: '',
+      direction: 'ltr',
+      lang: {},
+      langs: [],
+      trnTrn: 0,
+      interfaceLangDialogOpen: false,
+      labels: labelsToTranslate.reduce((obj, v) => {obj[v] = v; return obj;}, {}),
       chaos: 6,
       fakeExprs: [],
-      direction: 'ltr',
-      interfaceLang: 'eng-000',
-      labels: labelsToTranslate.reduce((obj, v) => {obj[v] = v; return obj;}, {}),
-      sliding: false,
-      langs: []
+      kmc: "",
+      re: "",
     }
-    this.setLabels()
   }
+
+  componentWillMount() {
+    window.addEventListener('resize', () => this.setState({compact: window.innerWidth <= compactWidth}));
+  }
+
+  componentDidMount() {
+    this.cacheLvs().then(() => this.getInitialLangs(initialUids));
+    this.chaosSlider = new MDCSlider(document.querySelector('.mdc-slider'));
+    this.chaosSlider.listen('MDCSlider:change', () => this.setState({chaos: this.chaosSlider.value}));
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', () => this.setState({windowWidth: window.innerWidth}));
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.interfaceLangvar !== this.state.interfaceLangvar) {
+      this.setLabels();
+      this.getOtherNames();
+      this.cacheKar();
+      this.cacheLoc();
+    }
+    if (prevState.lang.id && (prevState.lang.id !== this.state.lang.id)) {
+      localStorage.setItem("lang", this.state.lang.id);
+      this.setState(
+        {langs: [...new Set([prevState.lang, ...prevState.langs])]},
+        () => this.getOtherNames()
+      )
+    }
+  }
+
+  cacheLvs = () => (
+    query('/langvar', {limit: 0, exclude: [
+      'grp', 
+      'lang_code', 
+      'mutable', 
+      'name_expr',
+      'name_expr_txt_degr',
+      'var_code',
+     ]}).then(
+      r => {
+        let lvCache = new Map();
+        r.result.forEach(lv => {lvCache.set(lv.id, lv)});
+        this.setState({lvCache});
+      })
+  )
   
-  setLabels = () => {
-    getTranslations(Object.keys(this.state.labels), 'art-000', this.state.interfaceLang)
-    .then((result) => {
-      let output = {};
-      for (let txt of Object.keys(this.state.labels)) {
-        output[txt] = result.filter(trn => (trn.trans_txt === txt))[0].txt
-      };
-      this.setState({labels: output, interfaceLangvar: result[0].langvar});
+  cacheKar = () => (
+    getAllTranslations('art-262', this.state.interfaceLangvar, true).then(
+      karCache => {
+        let lvCache = this.state.lvCache;
+        lvCache.forEach(lv => {
+          lv.scriptNames = karCache[lv.script_expr].map(r => r.txt);
+        })
+        this.setState({lvCache});
+      }
+    )
+  )
+
+  cacheLoc = () => {
+    let locExprs = [];
+    this.state.lvCache.forEach(v => locExprs.push(v.region_expr));
+    getMultTranslations(locExprs, '', this.state.interfaceLangvar).then(
+      locCache => {
+        let lvCache = this.state.lvCache;
+        lvCache.forEach(lv => {
+          lv.regionNames = locCache[lv.region_expr].map(r => r.txt);
+        })
+        this.setState({lvCache});
+      }
+    )
+  }
+
+  fromLvCache = (lvId) => (this.state.lvCache.get(lvId) || {})
+
+  getInitialLangs = (initialUids) => {
+    let initialUidsSet = new Set(initialUids);
+    let langs = [];
+    let interfaceLv;
+    this.state.lvCache.forEach((lv, lvId) => {
+      if (initialUidsSet.has(lv.uid)) {
+        langs.push(lv);
+      }
+      if (lv.uid === initialInterfaceUid) {
+        interfaceLv = lv;
+      }
+    })
+    this.setState({
+      lang: this.state.lvCache.get(Number(localStorage.getItem("lang"))) || interfaceLv,
+      langs: shuffle(langs),
+      interfaceLangvar: interfaceLv.id
     });
   }
-  
+
+  setLabels = () => {
+    getMultTranslations(Object.keys(this.state.labels), 'art-000', this.state.interfaceLangvar).then(
+      result => {
+        let labels = Object.keys(this.state.labels).reduce((obj, label) => {
+          if (result[label][0]) {
+            obj[label] = result[label][0].txt;
+          } else {
+            obj[label] = "";
+          }
+          return(obj)
+        }, {})
+        this.setState({labels})
+      }
+    )
+  }
+
   getLabel = (label) => (this.state.labels[label]) ? this.state.labels[label] : label;
-  
-  handleSlider = (event, value) => {
-    this.setState({chaos: value});
+
+  getOtherNames = () => {
+    let langs = [this.state.lang, ...this.state.langs]
+    getMultTranslations(langs.map(lv => lv.uid), 'art-274', this.state.interfaceLangvar)
+      .then(result => {
+        let lvCache = this.state.lvCache;
+        langs.forEach(lv => {
+          let lang = lvCache.get(lv.id);
+          lang.otherNames = result[lang.uid].map(r => r.txt);
+          lvCache.set(lv, lang);
+
+        })
+        this.setState(lvCache);
+      })
   }
-  
-  handleSelection = (index) => {
-    let newFakeExprs = this.state.fakeExprs.slice();
-    newFakeExprs[index].saved = !newFakeExprs[index].saved;
-    this.setState({fakeExprs: newFakeExprs})
-  }
-  
-  generate = (event) => {
+
+  generate = event => {
     let savedFakeExprs = this.state.fakeExprs.filter((fakeExpr) => fakeExpr.saved)
     this.setState({loading: true})
-    query('/fake_expr', {'uid': this.state.uid, 'state_size': 11 - this.state.chaos, 'count': 25})
+    query('/fake_expr', {
+      'uid': this.state.lang.uid, 
+      'state_size': 11 - this.state.chaos, 
+      'count': 25, 
+      'init_state': this.state.kmc,
+      'skip_re': this.state.re,
+    })
     .then(
       (response) => {
         if (response.result)
@@ -92,124 +213,169 @@ class App extends Component {
       }
     )
   }
-  
+
+//   handleTouchLvChip = (event, lv) => {
+//     [].forEach.call(document.getElementsByClassName("droppable"), e => {
+//       e.classList.add("drop-highlight");
+//     });
+//     this.setState({touchedLv: lv});
+//   }
+
+//   handleTouchLang = event => {
+//     console.log(event);
+//     [].forEach.call(document.getElementsByClassName("droppable"), e => {
+//       e.classList.remove("drop-highlight");
+//     });
+//     let lang = this.state.lvCache.get(this.state.touchedLv);
+//     this.setState({lang, touchedLv: undefined});
+//   }
+
   render() {
-    let dirStyles = {};
-    if (this.state.direction === 'rtl') {
-      this.state.muiTheme.isRtl = true;
-      dirStyles['slider-icon'] = {transform: 'scaleX(-1)'};
-      dirStyles['slider-label-box'] = {transform: 'translate(-50%)'};
-      dirStyles['slider-svg'] = {transform: 'translate(50%, -110%)'};
-      dirStyles['slider-label-text'] = {transform: 'translate(50%, -500%)'};
-    } else {
-      this.state.muiTheme.isRtl = false;
-      dirStyles['slider-icon'] = {transform: 'scaleX(1)'};
-      dirStyles['slider-label-box'] = {transform: 'translate(50%)'};
-      dirStyles['slider-svg'] = {transform: 'translate(-50%, -110%)'};
-      dirStyles['slider-label-text'] = {transform: 'translate(-50%, -500%)'};
-    }
-    let slidingStyleTransform = ' ' + (this.state.sliding ? 'scale(1)' : 'scale(0)');
-    dirStyles['slider-svg'].transform += slidingStyleTransform;
-    dirStyles['slider-label-text'].transform += slidingStyleTransform;
-        
     return (
-      <div className="App" style={{direction: this.state.direction}}>
-        <MuiThemeProvider muiTheme={this.state.muiTheme}>
-          <div>
-            <PanLexAppBar 
-              direction={this.state.direction}
-              title={[this.getLabel('PanLex'), this.getLabel('epr'), this.getLabel('zxx')].join(' — ')}
-              lngModLabel={[this.getLabel('lng'), this.getLabel('mod')].join(' — ')}
-              donLabel={this.getLabel('don')}
-              switchDirection={() => this.setState({direction: (this.state.direction === 'rtl') ? 'ltr' : 'rtl'})}
-              setInterfaceLang={(lang) => {
-                this.setState({ 
-                  interfaceLang: lang.uid,
-                });
-                this.setLabels(lang.uid);
-              }}
-              interfaceLangvar={this.state.interfaceLangvar}
-            />
-            <div className="app-body">
-              <UidInputChipped
-                langList={this.state.langs}
-                onSelectLang={(langList) => this.setState({langs: langList, uid: langList[0].uid })}
-                direction={this.state.direction}
-                label={this.getLabel('lng')}
-                interfaceLangvar={this.state.interfaceLangvar}
-                compact={true}
-              />
-              <div className="slider-box">
-                <span className="slider-icon chaos-low" style={dirStyles['slider-icon']}>🗨</span>
-                <Slider
-                  className="slider"
-                  step={1}
-                  min={1}
-                  max={10}
-                  value={this.state.chaos}
-                  onChange={this.handleSlider}
-                  onDragStart={() => this.setState({sliding: true})}
-                  onDragStop={() => this.setState({sliding: false})}
-                  label={
-                    <div 
-                      className="slider-label-box"
-                      style={dirStyles['slider-label-box']}
-                    >
-                      <svg 
-                        className="slider-svg" 
-                        width={50} 
-                        height={50}
-                        style={dirStyles['slider-svg']}
+      <div className="mdc-typography App" dir={this.state.direction}>
+        <div>
+          <PanLexAppBar 
+            panlexLabel={this.getLabel('PanLex')}
+            title={[this.getLabel('PanLex'), this.getLabel('epr'), this.getLabel('zxx')].join(' — ')}
+            lngModLabel={[this.getLabel('lng'), this.getLabel('mod')].join(' — ')}
+            donLabel={this.getLabel('don')}
+            switchDirection={() => this.setState({direction: (this.state.direction === 'rtl') ? 'ltr' : 'rtl'})}
+            setInterfaceLangvar={langvar => {
+              this.setState({ 
+                interfaceLangvar: langvar,
+              });
+            }}
+            interfaceLangvar={this.state.interfaceLangvar}
+            trnLabel={this.getLabel('trn')}
+            trnTrnLabel={[this.getLabel('trn'), this.getLabel('trn')].join(' — ')}
+            handleTrnTrn={() => this.setState({trnTrn: (this.state.trnTrn + 1) % 3})}
+            trnTrn={this.state.trnTrn}
+            debug={DEBUG}
+          />
+          <main className="mdc-toolbar-fixed-adjust main-area">
+            {/* <div className="trn"> */}
+              {/* <div className="trn-box"> */}
+                <div
+                  onDrop={event => {
+                    event.preventDefault();
+                    let lang = this.state.lvCache.get(parseInt(event.dataTransfer.getData("text"), 10));
+                    if (lang) {this.setState({lang})}
+                  }}
+                  onDragOver={event => {event.preventDefault()}}
+                >
+                  <div className="uid-box">
+                    <div className="txt-inputs">
+                      <LvInput
+                        label={this.getLabel('lng')}
+                        interfaceLangvar={this.state.interfaceLangvar}                        
+                        onNewRequest={lv => {
+                          let lang = this.state.lvCache.get(lv);
+                          this.setState({lang});
+                        }}
+                      />
+                      <div 
+                        ref={div => {if (div) {this.kmcInput = new MDCTextField(div)}}}
+                        className="input-box mdc-text-field mdc-text-field--upgraded"
                       >
-                        <path d="m25 50 l -10 -10 a 15 15, 0, 1, 1, 20 0 Z" fill={this.state.muiTheme.palette.primary1Color}/>
-                      </svg>
-                      <div
-                        className="slider-label-text"
-                        style={dirStyles['slider-label-text']}
+                        <input 
+                          id="kmc-input"
+                          className="mdc-text-field__input"
+                          type="text"
+                          value={this.state.kmc}
+                          onChange={e => this.setState({kmc: e.target.value})}
+                          autoCapitalize="none"
+                        />
+                        <label className="mdc-text-field__label" htmlFor="kmc-input">{this.props.label}</label>
+                        <div className="mdc-line-ripple"/>
+                      </div>
+                      <div 
+                        ref={div => {if (div) {this.reInput = new MDCTextField(div)}}}
+                        className="input-box mdc-text-field mdc-text-field--upgraded"
                       >
-                        {this.state.chaos}
+                        <input 
+                          id="re-input"
+                          className="mdc-text-field__input"
+                          type="text"
+                          value={this.state.re}
+                          onChange={e => this.setState({re: e.target.value})}
+                          autoCapitalize="none"
+                        />
+                        <label className="mdc-text-field__label" htmlFor="re-input">{this.props.label}</label>
+                        <div className="mdc-line-ripple"/>
                       </div>
                     </div>
-                  }
+                    <LvInfo 
+                      nomLabel={this.getLabel('nom') + " — " + this.fromLvCache(this.state.interfaceLangvar).name_expr_txt + ":"}
+                      karLabel={this.getLabel('kar') + ":"}
+                      locLabel={this.getLabel('loc') + ":"}
+                      lang={this.state.lang}
+                    //   onTouchStart={this.state.touchedLv && this.handleTouchLang}
+                    />
+                  </div>
+
+                </div>
+                <LvChips
+                  langList={this.state.langs}
+                  onTouchStart={this.handleTouchLvChip}
                 />
-                <span className="slider-icon chaos-high" style={dirStyles['slider-icon']}>🗯</span>
-              </div>
-              <RaisedButton
-                className="go-button"
-                label={(this.state.fakeExprs.length > 0) ? this.getLabel('plu') : this.getLabel('kmc')}
-                onClick={this.generate}
-                primary={true}
-              />
-              <div className="result">
-                {(this.state.loading) ?
-                  <div className="loading-icon"><CircularProgress/></div> :
-                  <Table 
-                    multiSelectable={true}
-                    onCellClick={(rowNumber) => this.handleSelection(rowNumber)}
-                  >
-                    <TableBody displayRowCheckbox={true}>
-                      {this.state.fakeExprs.map( (fakeExpr, index) =>
-                        <TableRow
-                          className="fake-expr-row"
-                          key={index}
-                          selected={fakeExpr.saved}
-                          style={{height: '40px'}}
-                        >
-                          <TableRowColumn 
-                            style={{fontSize: '16px', height: '40px'}}
-                          >
-                            {fakeExpr.txt}
-                          </TableRowColumn>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
+                <div className="mdc-slider mdc-slider--discrete" tabIndex="0" role="slider"
+                     aria-valuemin="1" aria-valuemax="10" aria-valuenow="6" aria-label="Select Value">
+                  <div className="mdc-slider__track-container chaos-bg">
+                    <div className="mdc-slider__track chaos"/>
+                  </div>
+                  <div className="mdc-slider__thumb-container">
+                    <div className="mdc-slider__pin chaos chaos-pin">
+                      <span className="mdc-slider__pin-value-marker"/>
+                    </div>
+                    <svg className="mdc-slider__thumb chaos-thumb" width="21" height="21">
+                      <circle cx="10.5" cy="10.5" r="7.875"/>
+                    </svg>
+                    <div className="mdc-slider__focus-ring chaos"/>
+                  </div>
+                </div>
+                <button className="kmc-button mdc-button mdc-button--raised" onClick={this.generate}>
+                  {(this.state.fakeExprs.length > 0) ? this.getLabel('plu') : this.getLabel('kmc')}                
+                </button>
+                {this.state.loading ? <div className="loading-icon"><LoadingIcon size="48"/></div> :
+                  <ul className="mdc-list">
+                  {this.state.fakeExprs.map((expr, index) => (
+                    <li 
+                      className="mdc-list-item" 
+                      key={index}
+                      onClick={() => {
+                        let fakeExprs = this.state.fakeExprs;
+                        fakeExprs[index].saved = !this.state.fakeExprs[index].saved;
+                        this.setState({fakeExprs});
+                      }}
+                    >
+                      <div className="mdc-form-field">
+                        <div className="mdc-checkbox">
+                          <input type="checkbox"
+                                className="mdc-checkbox__native-control"
+                                id={"checkbox-" + index}
+                                checked={this.state.fakeExprs[index].saved}
+                                onChange={e => e.preventDefault()}
+                          />
+                          <div className="mdc-checkbox__background">
+                            <svg className="mdc-checkbox__checkmark"
+                                viewBox="0 0 24 24">
+                              <path className="mdc-checkbox__checkmark-path"
+                                    fill="none"
+                                    d="M1.73,12.91 8.1,19.28 22.79,4.59"/>
+                            </svg>
+                            <div className="mdc-checkbox__mixedmark"></div>
+                          </div>
+                        </div>
+                        <label htmlFor={"checkbox-" + index}>{expr.txt}</label>
+                      </div>
+                    </li>
+                  ))}
+                  </ul>
                 }
-              </div>
-            </div>
-          </div>
-        </MuiThemeProvider>
-        {/* {locale2} */}
+              {/* </div> */}
+            {/* </div> */}
+          </main>
+        </div>
       </div>
     );
   }

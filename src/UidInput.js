@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 
 import AutoComplete from 'material-ui/AutoComplete';
 import MenuItem from 'material-ui/MenuItem';
-import CircularProgress from 'material-ui/CircularProgress';
+
+import MDSpinner from "react-md-spinner";
 
 import debounce from 'lodash/debounce';
 import { query } from './api';
@@ -28,10 +29,11 @@ export default class UidInput extends Component {
           let suggestions = response.suggest.map((s) => {
             let altNameString = s.trans.slice(1).map(tran => tran.txt).join(' — ');
             return {
-              uid: s.uid, 
+              id: s.id, 
               value: (
                 <MenuItem>
-                  <div className='uid-item' style={{direction: this.props.direction}}>
+                  {/* <div className='uid-item' style={{direction: this.props.direction}}> */}
+                  <div className='uid-item' dir={this.props.direction}>
                     <div className='uid-line uid-main'>
                       <span className='uid-name'>{s.trans[0].txt}</span>
                       <span>{s.uid}</span>
@@ -62,8 +64,8 @@ export default class UidInput extends Component {
       originHorizontal = (this.props.direction === 'rtl') ? "right" : "left";
     }
     return (
-      <span className="uid-input" style={this.props.style}>
-        {this.state.loading && <CircularProgress className="loading"/>}
+      <span className="uid-input" style={this.props.style} dir={this.props.direction}>
+        {this.state.loading && <MDSpinner singleColor="#C82521" className="loading"/>}
         <AutoComplete
           floatingLabelText={this.props.label}
           floatingLabelStyle={{transformOrigin: (this.props.direction === 'rtl') ? "right top 0px" : "left top 0px"}}

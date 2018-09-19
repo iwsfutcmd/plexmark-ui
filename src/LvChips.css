@@ -1,0 +1,23 @@
+.draggable {
+  cursor: grab !important;
+}
+
+.lv-chip-names {
+  visibility: hidden;
+  position: absolute;
+  background-color: black;
+  color: white;
+  border-radius: 16px;
+  z-index: 1;
+  top: 100%;
+  left: 0;
+}
+
+.lv-chip:hover .lv-chip-names {
+  visibility: visible;
+}
+
+.drop-highlight {
+  border: 1px dashed black !important;
+  background-color: var(--mdc-theme-primary) !important;
+}

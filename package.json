@@ -3,13 +3,16 @@
  "version": "0.1.0",
  "private": true,
  "dependencies": {
+  "@material/checkbox": "^0.39.3",
   "locale2": "^2.1.4",
-  "material-ui": "^0.18.7",
+  "material-components-web": "^0.30.0",
+  "material-ui": "^0.20.0",
   "material-ui-slider-label": "https://github.com/tariqwest/material-ui-slider-label.git",
-  "react": "^15.6.1",
-  "react-dom": "^15.6.1",
-  "react-scripts": "1.0.10",
-  "react-tap-event-plugin": "^2.0.1"
+  "pnormaldist": "^1.0.1",
+  "react": "^16.2.0",
+  "react-dom": "^16.2.0",
+  "react-scripts": "1.1.1",
+  "react-tap-event-plugin": "^3.0.2"
  },
  "scripts": {
   "start": "react-scripts start",
